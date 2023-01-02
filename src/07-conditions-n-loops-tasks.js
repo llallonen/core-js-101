@@ -6,7 +6,6 @@
  *                                                                                                *
  ************************************************************************************************ */
 
-
 /**
  * Returns the 'Fizz','Buzz' or an original number using the following rules:
  * 1) return original number
@@ -39,7 +38,6 @@ function getFizzBuzz(num) {
   }
   return num;
 }
-
 
 /**
  * Returns the factorial of the specified integer n.
@@ -80,7 +78,6 @@ function getSumBetweenNumbers(n1, n2) {
   return sum;
 }
 
-
 /**
  * Returns true, if a triangle can be built with the specified sides a, b, c
  * and false in any other ways.
@@ -97,7 +94,7 @@ function getSumBetweenNumbers(n1, n2) {
  *   10,10,10 =>  true
  */
 function isTriangle(a, b, c) {
-  return (a + b > c) && (a + c > b) && (b + c > a);
+  return a + b > c && a + c > b && b + c > a;
 }
 
 /**
@@ -132,10 +129,9 @@ function isTriangle(a, b, c) {
  *   { top:20, left:20, width: 20, height: 20 }    =>  false
  *
  */
-function doRectanglesOverlap(/* rect1, rect2 */) {
-  throw new Error('Not implemented');
+function doRectanglesOverlap(rect1, rect2) {
+  return !(rect1.width < rect2.left || rect1.height < rect2.top);
 }
-
 
 /**
  * Returns true, if point lies inside the circle, otherwise false.
@@ -164,9 +160,11 @@ function doRectanglesOverlap(/* rect1, rect2 */) {
  *
  */
 function isInsideCircle(circle, point) {
-  return (point.x - circle.center.x) ** 2 + (point.y - circle.center.y) ** 2 < circle.radius ** 2;
+  return (
+    (point.x - circle.center.x) ** 2 + (point.y - circle.center.y) ** 2
+    < circle.radius ** 2
+  );
 }
-
 
 /**
  * Returns the first non repeated char in the specified strings otherwise returns null.
@@ -182,7 +180,6 @@ function isInsideCircle(circle, point) {
 function findFirstSingleChar(str) {
   return str.split('').find((e) => str.indexOf(e) === str.lastIndexOf(e));
 }
-
 
 /**
  * Returns the string representation of math interval,
@@ -214,7 +211,6 @@ function getIntervalString(a, b, isStartIncluded, isEndIncluded) {
   return `${opening}${first}, ${last}${closing}`;
 }
 
-
 /**
  * Reverse the specified string (put all chars in reverse order)
  *
@@ -230,7 +226,6 @@ function getIntervalString(a, b, isStartIncluded, isEndIncluded) {
 function reverseString(str) {
   return [...str].reverse().join('');
 }
-
 
 /**
  * Reverse the specified integer number (put all digits in reverse order)
@@ -248,7 +243,6 @@ function reverseInteger(num) {
   const x = num.toString();
   return [...x].reverse().join('');
 }
-
 
 /**
  * Validates the CCN (credit card number) and return true if CCN is valid
@@ -292,9 +286,13 @@ function getDigitalRoot(num) {
   if (num < 10) {
     return num;
   }
-  return getDigitalRoot(num.toString().split('').reduce((a, b) => (Number(a) + Number(b))));
+  return getDigitalRoot(
+    num
+      .toString()
+      .split('')
+      .reduce((a, b) => Number(a) + Number(b)),
+  );
 }
-
 
 /**
  * Returns true if the specified string has the balanced brackets and false otherwise.
@@ -317,10 +315,21 @@ function getDigitalRoot(num) {
  *   '{)' = false
  *   '{[(<{[]}>)]}' = true
  */
-function isBracketsBalanced(/* str */) {
-  throw new Error('Not implemented');
-}
+function isBracketsBalanced(str) {
+  const brackets = '[](){}<>';
+  const stack = [];
 
+  for (let i = 0; i < str.length; i += 1) {
+    const bracket = str[i];
+    const index = brackets.indexOf(bracket);
+    if (index % 2 === 0) {
+      stack.push(index + 1);
+    } else if (stack.pop() !== index) {
+      return false;
+    }
+  }
+  return stack.length === 0;
+}
 
 /**
  * Returns the string with n-ary (binary, ternary, etc, where n <= 10)
@@ -342,10 +351,11 @@ function isBracketsBalanced(/* str */) {
  *    365, 4  => '11231'
  *    365, 10 => '365'
  */
-function toNaryString(/* num, n */) {
-  throw new Error('Not implemented');
-}
+function toNaryString(num, n) {
+  const newNum = num.toString(n);
 
+  return newNum;
+}
 
 /**
  * Returns the common directory path for specified array of full filenames.
@@ -359,10 +369,84 @@ function toNaryString(/* num, n */) {
  *   ['/web/assets/style.css', '/.bin/mocha',  '/read.me'] => '/'
  *   ['/web/favicon.ico', '/web-scripts/dump', '/verbalizer/logs'] => '/'
  */
-function getCommonDirectoryPath(/* pathes */) {
-  throw new Error('Not implemented');
-}
+function getCommonDirectoryPath(pathes) {
+  const filter = (paths, predicate) => paths.reduce((acc, item) => {
+    if (acc.includes(item) || (!!predicate && predicate(item))) return acc;
 
+    acc.push(item);
+
+    return acc;
+  }, []);
+
+  const split = (path) => {
+    const els = path.split('/');
+
+    return els.map((el) => (el || '/'));
+  };
+
+  const createPaths = (subpaths) => {
+    const join = (strings) => {
+      let str = '';
+      for (let i = 0; i < strings.length; i += 1) {
+        if (strings[i] === '/') {
+          str = strings[i];
+        } else {
+          str += `${strings[i]}/`;
+        }
+      }
+
+      return str;
+    };
+
+    const variants = subpaths.map((subpath) => {
+      const copy = subpaths.slice();
+      const index = copy.indexOf(subpath);
+      const sliced = copy.splice(0, index);
+      return join(sliced);
+    });
+
+    variants.push(join(subpaths));
+
+    return filter(variants, (item) => !item);
+  };
+
+  const cache = {};
+
+  const uniquePaths = filter(pathes);
+  const splittedArrayPaths = uniquePaths.map((path) => split(path));
+
+  splittedArrayPaths.forEach((array) => {
+    const pathsWithoutExtensions = filter(array, (item) => new RegExp(/.+\..+/).test(item));
+    const paths = createPaths(pathsWithoutExtensions);
+
+    paths.forEach((path) => {
+      if (path in cache) {
+        cache[path] += 1;
+      } else {
+        cache[path] = 1;
+      }
+    });
+  });
+
+  const haveCommonSubpath = Object.values(cache).includes(pathes.length);
+  const allSubpathsHaveCommonWeight = Object.values(cache).every(
+    (item) => item === pathes.length,
+  );
+
+  if (!haveCommonSubpath) return '';
+
+  if (haveCommonSubpath && allSubpathsHaveCommonWeight) {
+    const mostLengthCommonSubpath = Object.keys(cache).sort((a, b) => b.length - a.length);
+    return mostLengthCommonSubpath[0];
+  }
+
+  const [pair] = Object.entries(cache).filter(([item, weight]) => item && weight === pathes.length);
+
+
+  const [subpath] = pair;
+
+  return subpath;
+}
 
 /**
  * Returns the product of two specified matrixes.
@@ -385,7 +469,6 @@ function getCommonDirectoryPath(/* pathes */) {
 function getMatrixProduct(/* m1, m2 */) {
   throw new Error('Not implemented');
 }
-
 
 /**
  * Returns the evaluation of the specified tic-tac-toe position.
@@ -420,7 +503,6 @@ function getMatrixProduct(/* m1, m2 */) {
 function evaluateTicTacToePosition(/* position */) {
   throw new Error('Not implemented');
 }
-
 
 module.exports = {
   getFizzBuzz,
